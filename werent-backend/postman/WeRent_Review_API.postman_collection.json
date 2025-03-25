@@ -1,0 +1,248 @@
+{
+	"info": {
+		"_postman_id": "werent-review-api",
+		"name": "WeRent Review API",
+		"description": "Collection for testing WeRent Review API endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "Get Product Reviews",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/reviews/:productId?page=1&limit=10&sort=newest",
+							"host": ["{{baseUrl}}"],
+							"path": ["reviews", ":productId"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "newest"
+								},
+								{
+									"key": "rating",
+									"value": "5",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "productId",
+									"value": "product_id_here"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Review",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{baseUrl}}/reviews",
+							"host": ["{{baseUrl}}"],
+							"path": ["reviews"]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": {
+								"product_id": "product_123",
+								"user_id": "user_123",
+								"rating": 5,
+								"review_text": "This dress is amazing! Perfect fit and great quality.",
+								"images": [],
+								"user_measurements": {
+									"waist": 68,
+									"bust": 88,
+									"hips": 92,
+									"height": 165
+								}
+							},
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					}
+				},
+				{
+					"name": "Update Review",
+					"request": {
+						"method": "PUT",
+						"url": {
+							"raw": "{{baseUrl}}/reviews/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["reviews", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "review_id_here"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": {
+								"rating": 4,
+								"review_text": "Updated review text",
+								"images": []
+							},
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					}
+				},
+				{
+					"name": "Delete Review",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/reviews/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["reviews", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "review_id_here"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark Review as Helpful",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{baseUrl}}/reviews/:id/helpful",
+							"host": ["{{baseUrl}}"],
+							"path": ["reviews", ":id", "helpful"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "review_id_here"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Get Product Details",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/products/:id",
+							"host": ["{{baseUrl}}"],
+							"path": ["products", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "product_id_here"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product Review Stats",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/products/:id/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["products", ":id", "stats"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "product_id_here"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Images",
+			"item": [
+				{
+					"name": "Get Upload Auth",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/images/auth",
+							"host": ["{{baseUrl}}"],
+							"path": ["images", "auth"]
+						}
+					}
+				},
+				{
+					"name": "Upload Image",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{baseUrl}}/images/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["images", "upload"]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": {
+								"file": "base64_encoded_image_here",
+								"fileName": "image.jpg"
+							},
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					}
+				},
+				{
+					"name": "Delete Image",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/images/:fileId",
+							"host": ["{{baseUrl}}"],
+							"path": ["images", ":fileId"],
+							"variable": [
+								{
+									"key": "fileId",
+									"value": "file_id_here"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api"
+		}
+	]
+}
