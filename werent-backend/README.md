@@ -1,43 +1,43 @@
-# WeRent Review API Documentation
+# WeRent Backend API
 
-## Overview
-WeRent Review API adalah backend service untuk sistem review  WeRent. API ini menangani manajemen review produk, termasuk upload gambar, statistik review, dan fitur pencarian review berdasarkan kemiripan ukuran tubuh.
+WeRent Backend API adalah layanan backend untuk aplikasi WeRent yang menyediakan endpoint untuk manajemen review produk, termasuk fitur upload gambar dan perhitungan kesamaan ukuran.
 
 ## Tech Stack
+
 - Next.js 14
 - MongoDB
-- ImageKit (untuk manajemen gambar)
+- ImageKit untuk manajemen gambar
+- CORS untuk keamanan cross-origin
 
 ## Prerequisites
+
 - Node.js v18 atau lebih tinggi
 - MongoDB
-- Akun ImageKit
+- Akun ImageKit (untuk manajemen gambar)
 
 ## Setup Development Environment
 
-1. Clone repository:
+1. Clone repository
 ```bash
 git clone https://github.com/yourusername/werent-backend.git
 cd werent-backend
 ```
 
-2. Install dependencies:
+2. Install dependencies
 ```bash
 npm install
 ```
 
-3. Setup environment variables (.env):
+3. Setup environment variables
+Buat file `.env` di root directory dengan konten berikut:
 ```env
-# MongoDB
-MONGODB_URI=your_mongodb_uri
-
-# ImageKit
+MONGODB_URI=mongodb://localhost:27017/werent
 IMAGEKIT_PUBLIC_KEY=your_public_key
 IMAGEKIT_PRIVATE_KEY=your_private_key
-IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_imagekit_id
+IMAGEKIT_URL_ENDPOINT=your_url_endpoint
 ```
 
-4. Jalankan development server:
+4. Jalankan development server
 ```bash
 npm run dev
 ```
@@ -46,302 +46,232 @@ Server akan berjalan di `http://localhost:3000`
 
 ## API Documentation
 
-### Base URL
-```
-http://localhost:3000/api
-```
+### Reviews Endpoint
 
-### 📁 Reviews
+#### GET /api/reviews
+Mendapatkan daftar review dengan filter dan pagination.
 
-#### 1. Get Product Reviews
-```http
-GET /reviews
-```
+**Query Parameters:**
+- `page` (optional): Nomor halaman (default: 1)
+- `limit` (optional): Jumlah item per halaman (default: 10, max: 100)
+- `product_id` (optional): Filter berdasarkan ID produk
+- `rating` (optional): Filter berdasarkan rating (1-5)
+- `sort` (optional): Pengurutan berdasarkan:
+  - `newest` (default)
+  - `oldest`
+  - `highest_rating`
+  - `lowest_rating`
+  - `most_helpful`
+- `sizeSimilarity` (optional): Filter berdasarkan kesamaan ukuran
+- `measurements` (optional): Ukuran tubuh untuk perhitungan kesamaan
 
-Query Parameters:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| product_id | string | Filter by product ID |
-| page | number | Page number (default: 1) |
-| limit | number | Items per page (default: 10, max: 100) |
-| sort | string | Sort order: newest, oldest, highest_rating, lowest_rating, most_helpful, size_similarity |
-| rating | number | Filter by rating (1-5) |
-| sizeSimilarity | boolean | Enable size similarity filter |
-| measurements | object | Required if sizeSimilarity=true |
-
-Example Request:
-```http
-GET /reviews?product_id=product_123&page=1&limit=10&sort=most_helpful&rating=5
-```
-
-Size Similarity Example:
-```http
-GET /reviews?sizeSimilarity=true&measurements={"waist":70,"bust":90,"hips":95,"height":165}&sort=size_similarity
-```
-
-Response:
+**Response:**
 ```json
 {
-    "success": true,
-    "data": {
-        "reviews": [{
-            "_id": "review_id",
-            "product_id": "product_123",
-            "user_id": "user_456",
-            "rating": 5,
-            "review_text": "Review text",
-            "images": ["image_url1"],
-            "helpful_count": 10,
-            "user_measurements": {
-                "waist": 70,
-                "bust": 90,
-                "hips": 95,
-                "height": 165
-            },
-            "sizeSimilarity": 0.95,
-            "created_at": "2024-03-25T10:00:00Z",
-            "updated_at": "2024-03-25T10:00:00Z"
-        }],
-        "pagination": {
-            "total": 50,
-            "totalPages": 5,
-            "currentPage": 1,
-            "hasNextPage": true,
-            "hasPrevPage": false
-        }
+  "success": true,
+  "data": {
+    "reviews": [...],
+    "pagination": {
+      "total": 50,
+      "totalPages": 5,
+      "currentPage": 1,
+      "hasNextPage": true,
+      "hasPrevPage": false
     }
+  }
 }
 ```
 
-#### 2. Create Review
-```http
-POST /reviews
-Content-Type: application/json
+#### POST /api/reviews
+Membuat review baru.
 
-{
-    "product_id": "product_123",
-    "user_id": "user_456",
-    "rating": 5,
-    "review_text": "This dress is amazing! Perfect fit and great quality.",
-    "user_measurements": {
-        "waist": 70,
-        "bust": 90,
-        "hips": 95,
-        "height": 165
-    },
-    "images": ["https://ik.imagekit.io/werent/image1.jpg"]
-}
-```
-
-Validation Rules:
-- rating: 1-5
-- review_text: minimal 10 karakter
-- user_measurements:
-  - waist: 50-150 cm
-  - bust: 50-150 cm
-  - hips: 50-150 cm
-  - height: 100-250 cm
-
-#### 3. Update Review
-```http
-PUT /reviews/67e2edd4e54e45570e86ea60
-Content-Type: application/json
-
-{
-    "rating": 4,
-    "review_text": "Updated review text",
-    "user_measurements": {
-        "waist": 70,
-        "bust": 90,
-        "hips": 95,
-        "height": 165
-    }
-}
-```
-
-#### 4. Delete Review
-```http
-DELETE /reviews/67e2edd4e54e45570e86ea60
-```
-
-#### 5. Mark Review as Helpful
-```http
-POST /reviews/67e2edd4e54e45570e86ea60/helpful
-```
-
-### 📁 Products
-
-#### 1. Get Product Details
-```http
-GET /products/67e2edd4e54e45570e86ea60
-```
-
-Response:
+**Request Body:**
 ```json
 {
-    "success": true,
-    "data": {
-        "product": {
-            "_id": "product_id",
-            "name": "Product Name",
-            "description": "Product description",
-            "category": "dress",
-            "price": 250000,
-            "sizes": ["S", "M", "L"],
-            "images": ["image_url1"],
-            "review_stats": {
-                "total_reviews": 10,
-                "average_rating": 4.5,
-                "rating_distribution": {
-                    "1": 0,
-                    "2": 1,
-                    "3": 2,
-                    "4": 3,
-                    "5": 4
-                }
-            },
-            "measurement_averages": {
-                "waist": 70,
-                "bust": 90,
-                "hips": 95,
-                "height": 165
-            }
-        },
-        "reviews": {
-            "items": [],
-            "pagination": {
-                "total": 10,
-                "totalPages": 1,
-                "currentPage": 1
-            }
-        }
-    }
+  "product_id": "product_123",
+  "user_id": "user_123",
+  "rating": 5,
+  "review_text": "Produk sangat bagus!",
+  "user_measurements": {
+    "waist": 70,
+    "bust": 90,
+    "hips": 95,
+    "height": 165
+  },
+  "image_urls": ["url1", "url2"]
 }
 ```
 
-#### 2. Get Product Review Stats
-```http
-GET /products/67e2edd4e54e45570e86ea60/stats
-```
+#### PUT /api/reviews/[id]
+Mengupdate review yang ada.
 
-### 📁 Images
-
-#### 1. Get Upload Auth
-```http
-GET /images/auth
-```
-
-Response:
+**Request Body:**
 ```json
 {
-    "success": true,
-    "data": {
-        "signature": "signature_string",
-        "token": "token_string",
-        "expire": 1234567890,
-        "uploadUrl": "https://upload.imagekit.io/your_imagekit_id"
-    }
+  "rating": 4,
+  "review_text": "Update review text",
+  "user_measurements": {
+    "waist": 72,
+    "bust": 92,
+    "hips": 97,
+    "height": 165
+  }
 }
 ```
 
-#### 2. Upload Image
-```http
-POST /images/upload
-Content-Type: application/json
+#### DELETE /api/reviews/[id]
+Menghapus review.
 
+#### POST /api/reviews/[id]/helpful
+Menandai review sebagai helpful.
+
+### Products Endpoint
+
+#### GET /api/products/[id]
+Mendapatkan detail produk.
+
+#### GET /api/products/[id]/stats
+Mendapatkan statistik review untuk produk.
+
+### Images Endpoint
+
+#### GET /api/images/auth
+Mendapatkan token autentikasi untuk upload gambar.
+
+#### POST /api/images/upload
+Upload gambar baru.
+
+**Request Body:**
+```json
 {
-    "file": "data:image/jpeg;base64,...",
-    "fileName": "review-image.jpg"
+  "file": "base64_encoded_image",
+  "fileName": "review_image.jpg",
+  "folder": "/reviews"
 }
 ```
 
-Rules:
-- Max file size: 5MB
-- Supported formats: JPEG, PNG, MP4
-
-#### 3. Delete Image
-```http
-DELETE /images/file_id_from_imagekit
-```
+#### DELETE /api/images/[id]
+Menghapus gambar.
 
 ## Testing dengan Postman
 
-1. Import Postman Collection:
-   - Download [WeRent-Review-API.postman_collection.json](link-to-collection)
-   - Import ke Postman
+1. Import collection WeRent API ke Postman
+2. Setup environment variables di Postman:
+   - `base_url`: http://localhost:3000
+   - `product_id`: ID produk yang valid
+   - `review_id`: ID review yang valid
 
-2. Setup Environment Variables di Postman:
+3. Flow testing yang disarankan:
+
+   a. Create Review:
+   ```http
+   POST {{base_url}}/api/reviews
+   Content-Type: application/json
+
+   {
+     "product_id": "{{product_id}}",
+     "user_id": "test_user",
+     "rating": 5,
+     "review_text": "Test review",
+     "user_measurements": {
+       "waist": 70,
+       "bust": 90,
+       "hips": 95,
+       "height": 165
+     }
+   }
    ```
-   BASE_URL: http://localhost:3000/api
-   PRODUCT_ID: (dari database)
-   REVIEW_ID: (dari response create review)
-   IMAGE_ID: (dari response upload image)
+
+   b. Get Reviews with Filter:
+   ```http
+   GET {{base_url}}/api/reviews?product_id={{product_id}}&rating=5&sort=most_helpful
    ```
 
-3. Testing Flow:
-   1. Create Review:
-      - Gunakan endpoint POST /reviews
-      - Simpan review_id dari response
+   c. Get Reviews with Size Similarity:
+   ```http
+   GET {{base_url}}/api/reviews?sizeSimilarity=true&measurements={"waist":70,"bust":90,"hips":95,"height":165}
+   ```
 
-   2. Upload Image:
-      - Get auth token dengan GET /images/auth
-      - Upload image dengan POST /images/upload
-      - Gunakan image URL di create/update review
+   d. Mark Review as Helpful:
+   ```http
+   POST {{base_url}}/api/reviews/{{review_id}}/helpful
+   ```
 
-   3. Test Review Operations:
-      - Update review dengan PUT /reviews/{review_id}
-      - Mark as helpful dengan POST /reviews/{review_id}/helpful
-      - Delete review dengan DELETE /reviews/{review_id}
+   e. Get Product Details:
+   ```http
+   GET {{base_url}}/api/products/{{product_id}}
+   ```
 
-   4. Test Filters & Sorting:
-      - Test berbagai kombinasi query parameters di GET /reviews
-      - Test size similarity filter dengan measurements yang berbeda
+   f. Get Product Stats:
+   ```http
+   GET {{base_url}}/api/products/{{product_id}}/stats
+   ```
 
-   5. Test Product Stats:
-      - Get product details dengan GET /products/{product_id}
-      - Get review stats dengan GET /products/{product_id}/stats
+   g. Upload Image:
+   ```http
+   # 1. Get auth token
+   GET {{base_url}}/api/images/auth
+
+   # 2. Upload image
+   POST {{base_url}}/api/images/upload
+   Content-Type: application/json
+
+   {
+     "file": "base64_encoded_image",
+     "fileName": "test_image.jpg",
+     "folder": "/reviews"
+   }
+   ```
 
 ## Error Handling
 
-Semua endpoint mengembalikan response error dalam format:
+Semua endpoint mengembalikan response dalam format yang konsisten:
+
 ```json
 {
-    "success": false,
+  "success": false,
+  "error": {
     "message": "Error message",
-    "error": "Detailed error message (only in development)"
+    "code": "ERROR_CODE"
+  }
 }
 ```
 
-Common HTTP Status Codes:
+Status code yang umum:
 - 200: Success
-- 201: Created
-- 400: Bad Request (validation error)
+- 400: Bad Request
 - 404: Not Found
-- 405: Method Not Allowed
 - 500: Internal Server Error
 
 ## Size Similarity Calculation
 
-Size similarity dihitung berdasarkan:
-- Bobot: waist (25%), bust (25%), hips (25%), height (25%)
-- Score: 0 (tidak mirip) sampai 1 (sangat mirip)
-- Threshold untuk filter: 0.8 (80% similarity)
+Perhitungan kesamaan ukuran menggunakan formula:
+```javascript
+similarity = 1 - (totalDifference / maxPossibleDifference)
+```
+
+Dimana:
+- `totalDifference`: Jumlah perbedaan absolut antara ukuran
+- `maxPossibleDifference`: Maksimum perbedaan yang mungkin (40cm)
 
 ## Rate Limiting & Security
-- Max file size: 5MB
-- Max items per page: 100
-- Authentication: Not implemented (TODO)
 
-## Contributing
+- CORS diimplementasikan untuk keamanan cross-origin
+- Validasi input untuk semua endpoint
+- Rate limiting akan diimplementasikan di masa depan
+- Autentikasi akan diimplementasikan di masa depan
+
+## Contributing Guidelines
+
 1. Fork repository
-2. Create feature branch
-3. Commit changes
-4. Push to branch
-5. Create Pull Request
+2. Buat branch baru (`git checkout -b feature/amazing-feature`)
+3. Commit perubahan (`git commit -m 'Add amazing feature'`)
+4. Push ke branch (`git push origin feature/amazing-feature`)
+5. Buat Pull Request
 
 ## License
-MIT License
 
+MIT License
 
 ## Link Postman 
 https://documenter.getpostman.com/view/38606972/2sAYkKJdZ2
