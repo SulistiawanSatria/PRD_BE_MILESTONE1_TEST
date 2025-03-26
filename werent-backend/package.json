@@ -1,35 +1,41 @@
 {
   "name": "werent-backend",
   "version": "1.0.0",
+  "engines": {
+    "node": "18.x"
+  },
   "description": "Backend service for WeRent clothing rental review system",
-  "private": true,
+  "main": "server.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "start": "next start -p $PORT",
+    "lint": "next lint",
+    "seed": "node scripts/seed.js"
   },
   "keywords": [
     "werent",
-    "review", 
+    "review",
     "rental",
     "fashion"
   ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^16.0.3",
-    "mongoose": "^7.0.3",
-    "imagekit": "^4.1.3",
-    "next": "^14.1.0",
-    "react": "^18.2.0", 
-    "react-dom": "^18.2.0"
+    "@vercel/node": "^3.0.24",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "imagekit": "^5.0.0",
+    "mongodb": "^6.5.0",
+    "mongoose": "^8.2.1",
+    "next": "14.1.3",
+    "react": "^18",
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "eslint": "^8.56.0",
-    "eslint-config-next": "^14.1.0"
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
   }
 }
